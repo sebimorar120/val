@@ -85,7 +85,8 @@
     }
 
     /* Floating hearts (clickable) */
-    .hearts{ position:fixed; inset:0; z-index: 1; overflow:hidden; }
+    .hearts{ position:fixed; inset:0; z-index: 1; overflow-x: hidden;
+      overflow-y: auto; }
     .heart{
       position:absolute;
       width: 14px; height: 14px;
@@ -124,7 +125,8 @@
       text-align:center;
       position: relative;
       z-index: 10;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: auto;
     }
     .card::before{
       content:"";
@@ -297,7 +299,8 @@
       width: min(560px, 96%);
       border-radius: 22px;
       position: relative;
-      overflow:hidden;
+      overflow-x: hidden;
+      overflow-y: auto;
       border: 1px solid var(--stroke);
       background: rgba(255,255,255,.45);
       box-shadow: var(--shadow);
@@ -963,8 +966,10 @@
     });
 
     openBtn.addEventListener("click", () => {
-      envelope.classList.toggle("open");
-      beep(520, .06, "triangle", .03);
+  const isOpen = envelope.classList.toggle("open");
+  openBtn.textContent = isOpen ? "Închide plicul" : "Deschide plicul";
+});
+beep(520, .06, "triangle", .03);
     });
 
     /********************
