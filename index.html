@@ -667,6 +667,39 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+
+      // --- Muzică: autoplay muted, apoi pornește cu sunet la primul click/tap (browser rule) ---
+      const bgMusic = document.getElementById("bgMusic");
+      const musicToast = document.getElementById("musicToast");
+
+      async function tryAutoplayMuted(){
+        if(!bgMusic) return;
+        try{
+          bgMusic.muted = true;
+          await bgMusic.play();
+          if(musicToast) musicToast.style.display = "block";
+        }catch(e){
+          // file missing or autoplay blocked; user gesture will handle it
+          if(musicToast) musicToast.style.display = "block";
+        }
+      }
+
+      async function unmuteAndPlay(){
+        if(!bgMusic) return;
+        try{
+          bgMusic.muted = false;
+          await bgMusic.play();
+        }catch(e){}
+        if(musicToast) musicToast.style.display = "none";
+      }
+
+      tryAutoplayMuted();
+
+      const firstGesture = () => unmuteAndPlay();
+      document.addEventListener("pointerdown", firstGesture, { once:true });
+      document.addEventListener("keydown", firstGesture, { once:true });
+      musicToast?.addEventListener("click", unmuteAndPlay);
+
       const params = new URLSearchParams(location.search);
       const toName = (params.get("to") || "Doroteea").trim();
       const fromName = (params.get("from") || "Sebastian").trim();
@@ -1025,5 +1058,21 @@ END:VCALENDAR`;
       render();
     });
   </script>
+
+  <!-- Muzică fundal (ai nevoie de assets/west-coast.mp3) -->
+  <audio id="bgMusic" preload="auto" loop playsinline>
+    <source src="assets/west-coast.mp3" type="audio/mpeg">
+  </audio>
+
+  <div id="musicToast" style="
+    position:fixed; left:50%; transform:translateX(-50%);
+    bottom:16px; z-index:9998;
+    background:rgba(255,255,255,.72); border:1px solid rgba(255,255,255,.60);
+    padding:10px 12px; border-radius:999px;
+    box-shadow:0 12px 30px rgba(0,0,0,.18);
+    font-weight:900; display:none; cursor:pointer; user-select:none;
+    backdrop-filter: blur(10px);
+  ">🔊 Apasă oriunde ca să pornească muzica</div>
+
 </body>
 </html>
