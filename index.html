@@ -1343,6 +1343,115 @@ END:VCALENDAR`;
     }else{
       updateInevitability();
     }
-  </script>
+  
+/* === GAMES FIX (AUTOINJECT) === */
+(function(){
+  // Wheel: ensure handlers exist + can't get stuck
+  const wheel = document.getElementById("wheel");
+  const spinBtn = document.getElementById("spinBtn");
+  const spinText = document.getElementById("spinText");
+  if (wheel && spinBtn && spinText){
+    const outcomes = [
+      "Bonus: tu alegi playlist-ul 🎶",
+      "Bonus: desert obligatoriu 🍰",
+      "Bonus: 3 îmbrățișări minim 🤗",
+      "Bonus: eu aduc flori 🌸",
+      "Bonus: pupic pe frunte 💋",
+      "Bonus: ținute asortate (poate) 😌"
+    ];
+    const doSpin = () => {
+      if (wheel.dataset.spinning === "1") return;
+      wheel.dataset.spinning = "1";
+      wheel.classList.add("spin");
+
+      const idx = Math.floor(Math.random()*outcomes.length);
+
+      window.setTimeout(() => {
+        wheel.classList.remove("spin");
+        wheel.dataset.spinning = "0";
+        spinText.textContent = outcomes[idx];
+      }, 1250);
+    };
+
+    // Remove old listeners by replacing nodes (safe)
+    const newSpinBtn = spinBtn.cloneNode(true);
+    spinBtn.parentNode.replaceChild(newSpinBtn, spinBtn);
+    const newWheel = wheel.cloneNode(true);
+    wheel.parentNode.replaceChild(newWheel, wheel);
+
+    newSpinBtn.addEventListener("click", doSpin);
+    newWheel.addEventListener("click", doSpin);
+  }
+
+  // Memory: rebuild grid with working listeners
+  const grid = document.getElementById("memoryGrid");
+  const memoryText = document.getElementById("memoryText");
+  if (grid && memoryText){
+    const icons = ["💘","💘","🍓","🍓","🌙","🌙","🎀","🎀"];
+    const shuffle = (a) => {
+      for (let i=a.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i],a[j]]=[a[j],a[i]];
+      }
+      return a;
+    };
+
+    const deck = shuffle([...icons]);
+    let first = null, lock = false, matched = 0;
+
+    const render = () => {
+      grid.innerHTML = "";
+      deck.forEach((ic, idx) => {
+        const t = document.createElement("div");
+        t.className = "tile";
+        t.textContent = "•";
+        t.dataset.idx = String(idx);
+        t.addEventListener("click", () => flip(t));
+        grid.appendChild(t);
+      });
+      memoryText.textContent = "Găsește toate perechile.";
+    };
+
+    const flip = (el) => {
+      if (lock || el.classList.contains("matched") || el.classList.contains("revealed")) return;
+      const idx = Number(el.dataset.idx);
+      el.classList.add("revealed");
+      el.textContent = deck[idx];
+
+      if (!first){
+        first = el;
+        return;
+      }
+      if (first === el) return;
+
+      const i1 = Number(first.dataset.idx);
+      const i2 = idx;
+
+      if (deck[i1] === deck[i2]){
+        el.classList.add("matched");
+        first.classList.add("matched");
+        matched += 2;
+        first = null;
+        memoryText.textContent = matched === deck.length
+          ? "Deblocat: noi doi = match perfect 💞"
+          : `Perechi: ${matched/2}/4.`;
+      } else {
+        lock = true;
+        window.setTimeout(() => {
+          el.classList.remove("revealed");
+          first.classList.remove("revealed");
+          el.textContent = "•";
+          first.textContent = "•";
+          first = null;
+          lock = false;
+        }, 650);
+      }
+    };
+
+    render();
+  }
+})();
+
+</script>
 </body>
 </html>
