@@ -1,140 +1,511 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ro">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Will you be my Valentine?</title>
+  <title>Vrei să fii Valentine-ul meu?</title>
 
-  <!-- Confetti library -->
+  <!-- Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
   <style>
-    :root {
-      --bg1: #ffd6e7;
-      --bg2: #ffeef6;
-      --card: #ffffffcc;
-      --yes: #ff3b7a;
-      --yesHover: #ff1f68;
+    :root{
+      --bg1:#ffd6e7;
+      --bg2:#fff1f7;
+      --card: rgba(255,255,255,.74);
+      --stroke: rgba(255,255,255,.55);
+      --text:#2b1b24;
+      --muted:#6d4358;
+      --yes:#ff3b7a;
+      --yesHover:#ff1f68;
+      --shadow: 0 18px 60px rgba(43, 27, 36, .22);
+      --radius: 26px;
+      --ring: rgba(255,59,122,.25);
+      --panel: rgba(255,255,255,.55);
+      --danger: #111827;
+    }
+    :root.night{
+      --bg1:#1a1020;
+      --bg2:#100a16;
+      --card: rgba(255,255,255,.10);
+      --stroke: rgba(255,255,255,.14);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.72);
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
+      --ring: rgba(255,59,122,.35);
+      --panel: rgba(255,255,255,.08);
+      --danger: rgba(255,255,255,.92);
     }
 
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
+    *{ box-sizing:border-box; }
+    html{ height:100%; }
+    body{
+      margin:0;
       min-height: 100svh;
-      display: grid;
-      place-items: center;
-      background: radial-gradient(circle at top, var(--bg2), var(--bg1));
-      font-family: system-ui, sans-serif;
-      overflow: hidden;
-      padding: 16px;
+      display:grid;
+      place-items:center;
+      padding: 18px;
+      padding-top: calc(18px + env(safe-area-inset-top));
+      padding-bottom: calc(18px + env(safe-area-inset-bottom));
+      overflow:hidden;
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(900px 520px at 20% 20%, rgba(255, 59, 122, .20), transparent 55%),
+        radial-gradient(900px 540px at 80% 20%, rgba(255, 177, 206, .28), transparent 60%),
+        radial-gradient(circle at top, var(--bg2), var(--bg1));
+      transition: background .25s ease, color .25s ease;
+    }
+    :root.night body{
+      background:
+        radial-gradient(900px 520px at 20% 20%, rgba(255, 59, 122, .14), transparent 55%),
+        radial-gradient(900px 540px at 80% 20%, rgba(255, 177, 206, .10), transparent 60%),
+        radial-gradient(circle at top, var(--bg2), var(--bg1));
     }
 
-    /* FULL-SCREEN CONFETTI CANVAS */
-    #confettiCanvas {
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 9999;
+    @media (prefers-reduced-motion: reduce){
+      *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition: none !important; scroll-behavior: auto !important; }
     }
 
-    .card {
-      width: min(720px, 92vw);
-      padding: 26px 22px;
+    #confettiCanvas{
+      position:fixed; inset:0; width:100vw; height:100vh;
+      pointer-events:none; z-index: 9999;
+    }
+    #sparkleCanvas{
+      position:fixed; inset:0; width:100vw; height:100vh;
+      pointer-events:none; z-index: 5;
+      mix-blend-mode: screen;
+      opacity: .85;
+    }
+
+    /* Floating hearts (clickable) */
+    .hearts{ position:fixed; inset:0; z-index: 1; overflow:hidden; }
+    .heart{
+      position:absolute;
+      width: 14px; height: 14px;
+      transform: rotate(45deg);
+      background: rgba(255,59,122,.18);
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 4px;
+      animation: floatUp linear infinite;
+      box-shadow: 0 10px 30px rgba(255, 59, 122, .10);
+      cursor: pointer;
+      pointer-events: auto;
+    }
+    :root.night .heart{ background: rgba(255,59,122,.14); border-color: rgba(255,255,255,.18); }
+    .heart:before, .heart:after{
+      content:""; position:absolute;
+      width: 14px; height: 14px;
+      background: inherit; border: inherit;
+      border-radius: 50%;
+    }
+    .heart:before{ left:-7px; top:0; }
+    .heart:after{ top:-7px; left:0; }
+    @keyframes floatUp{
+      from{ transform: translateY(110vh) rotate(45deg); opacity: 0; }
+      10%{ opacity: 1; }
+      to{ transform: translateY(-30vh) rotate(45deg); opacity: 0; }
+    }
+
+    .card{
+      width: min(780px, 92vw);
+      padding: 22px 20px;
+      border-radius: var(--radius);
       background: var(--card);
-      backdrop-filter: blur(10px);
-      border-radius: 22px;
-      text-align: center;
-      box-shadow: 0 18px 60px rgba(0,0,0,.15);
-    }
-
-    .art {
-      width: min(260px, 80vw);
-      margin: 0 auto 10px;
-      display: block;
-      filter: drop-shadow(0 10px 14px rgba(0,0,0,.12));
-    }
-
-    h1 {
-      font-size: clamp(26px, 4vw, 44px);
-      margin: 12px 0 18px;
-    }
-
-    .button-zone {
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      text-align:center;
       position: relative;
-      width: min(520px, 92%);
-      height: 150px;
+      z-index: 10;
+      overflow: hidden;
+    }
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-120px;
+      background: radial-gradient(circle at var(--px, 50%) var(--py, 35%), var(--ring), transparent 42%);
+      pointer-events:none;
+      opacity: .9;
+      transition: opacity .15s ease;
+    }
+
+    .topbar{
+      display:flex; justify-content:space-between; align-items:center;
+      gap: 10px; margin-bottom: 6px; position: relative; z-index: 2;
+    }
+    .badge{
+      font-size: 12px; font-weight: 800;
+      padding: 8px 10px; border-radius: 999px;
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      color: var(--muted);
+      display:inline-flex; gap: 8px; align-items:center;
+      user-select:none;
+    }
+    .controls{ display:flex; gap: 8px; align-items:center; justify-content:flex-end; }
+    .iconBtn{
+      border: 1px solid var(--stroke);
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 900;
+      cursor: pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .iconBtn:hover{ transform: translateY(-1px); }
+    .iconBtn:active{ transform: translateY(0px); }
+
+    .art{
+      width: min(280px, 78vw);
+      margin: 6px auto 6px;
+      display:block;
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,.12));
+      position: relative; z-index: 2;
+    }
+
+    h1{
+      font-family: Fraunces, serif;
+      font-size: clamp(28px, 4.1vw, 48px);
+      line-height: 1.08;
+      margin: 10px 0 8px;
+      position: relative; z-index: 2;
+      letter-spacing: -0.02em;
+    }
+    .sub{
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-weight: 700;
+      position: relative; z-index: 2;
+    }
+
+    .stats{
+      display:flex; flex-wrap: wrap; gap: 10px;
+      justify-content:center;
+      margin: 10px 0 10px;
+      position: relative; z-index: 2;
+    }
+    .stat{
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.35);
+      border-radius: 16px;
+      padding: 10px 12px;
+      min-width: 160px;
+    }
+    :root.night .stat{ background: rgba(255,255,255,.06); }
+    .stat b{ display:block; font-size: 14px; }
+    .stat span{ color: var(--muted); font-weight: 700; font-size: 12px; }
+
+    .button-zone{
+      position: relative;
+      width: min(560px, 96%);
+      height: 176px;
       margin: 0 auto;
       touch-action: none;
+      border-radius: 18px;
+      position: relative; z-index: 2;
     }
 
-    button {
-      position: absolute;
+    button{
+      position:absolute;
       top: 50%;
       transform: translateY(-50%);
       padding: 16px 24px;
       font-size: 18px;
-      font-weight: 800;
+      font-weight: 900;
       border-radius: 999px;
       border: none;
       cursor: pointer;
       box-shadow: 0 10px 24px rgba(0,0,0,.14);
       user-select: none;
       -webkit-tap-highlight-color: transparent;
-      transition: transform .12s ease, background .12s ease;
+      transition: transform .12s ease, background .12s ease, filter .12s ease;
+      outline: none;
+    }
+    button:focus-visible{
+      box-shadow: 0 0 0 4px rgba(255,59,122,.25), 0 10px 24px rgba(0,0,0,.14);
     }
 
-    #yesBtn {
-      left: 18%;
+    #yesBtn{
+      left: 16%;
       background: var(--yes);
-      color: #fff;
+      color:#fff;
     }
-    #yesBtn:hover { background: var(--yesHover); }
+    #yesBtn:hover{ background: var(--yesHover); }
 
-    #noBtn {
+    #noBtn{
       left: 62%;
       background: #e5e7eb;
       color: #111827;
     }
+    :root.night #noBtn{
+      background: rgba(255,255,255,.12);
+      color: var(--danger);
+      border: 1px solid rgba(255,255,255,.12);
+    }
 
-    .hint {
+    .hint{
       margin-top: 10px;
       font-size: 13px;
-      opacity: .7;
+      color: var(--muted);
+      font-weight: 700;
+      opacity: .95;
+      position: relative; z-index: 2;
     }
 
-    .result {
-      display: none;
-      margin-top: 18px;
+    .dialog{
+      margin: 12px auto 0;
+      width: min(640px, 96%);
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.35);
+      border-radius: 18px;
+      padding: 12px 14px;
+      text-align:left;
+      position: relative; z-index: 2;
+    }
+    :root.night .dialog{ background: rgba(255,255,255,.06); }
+    .dialog b{ display:block; font-size: 13px; margin-bottom: 4px; }
+    .dialog p{ margin:0; color: var(--muted); font-weight: 700; }
+
+    .result{
+      display:none;
+      margin-top: 14px;
       animation: pop .35s ease;
+      position: relative; z-index: 2;
+    }
+    .result h2{
+      font-family: Fraunces, serif;
+      font-size: clamp(30px, 4.5vw, 50px);
+      margin: 8px 0 10px;
+    }
+    .result .mini{
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-weight: 800;
     }
 
-    .result h2 {
-      font-size: clamp(30px, 4.5vw, 46px);
-      margin: 10px 0;
+    .envelopeWrap{ display:grid; place-items:center; margin: 10px auto 14px; }
+    .envelope{
+      width: min(560px, 96%);
+      border-radius: 22px;
+      position: relative;
+      overflow:hidden;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.45);
+      box-shadow: var(--shadow);
+    }
+    :root.night .envelope{ background: rgba(255,255,255,.06); }
+    .envelope .flap{
+      height: 62px;
+      background: linear-gradient(135deg, rgba(255,59,122,.26), rgba(255,122,176,.10));
+      border-bottom: 1px solid var(--stroke);
+      transform-origin: top;
+      transition: transform .55s cubic-bezier(.2,.9,.2,1);
+    }
+    .envelope.open .flap{ transform: rotateX(150deg); }
+    .envelope .note{ padding: 16px 16px 14px; text-align:left; }
+    .note h3{ margin: 0 0 6px; font-family: Fraunces, serif; letter-spacing: -0.02em; }
+    .note p{ margin: 0 0 10px; color: var(--muted); font-weight: 700; }
+    .note .sig{ color: var(--text); font-weight: 900; }
+
+    /* Photo strip */
+    .strip{
+      margin-top: 10px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.28);
+      border-radius: 18px;
+      padding: 12px;
+    }
+    :root.night .strip{ background: rgba(255,255,255,.05); }
+    .stripHead{
+      display:flex; align-items:flex-end; justify-content:space-between;
+      gap: 12px; margin-bottom: 10px;
+    }
+    .stripHead b{ font-size: 13px; }
+    .stripHead span{ font-size: 12px; color: var(--muted); font-weight: 800; }
+    .photos{
+      display:grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+    }
+    @media (max-width: 740px){
+      .photos{ grid-template-columns: repeat(3, 1fr); }
+    }
+    .photos img{
+      width: 100%;
+      aspect-ratio: 1/1;
+      object-fit: cover;
+      border-radius: 14px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.12);
     }
 
-    .fireworks {
-      width: min(380px, 90vw);
-      margin: 0 auto;
-      display: block;
+    .options{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+    @media (max-width: 720px){
+      .options{ grid-template-columns: 1fr; }
+      .button-zone{ height: 196px; }
+      #yesBtn{ left: 10%; }
+      #noBtn{ left: 56%; }
     }
 
-    @keyframes pop {
-      from { transform: scale(.96); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
+    .opt{
+      border-radius: 18px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.30);
+      padding: 12px;
+      text-align:left;
+      cursor: pointer;
+      transition: transform .12s ease;
+      user-select:none;
     }
+    :root.night .opt{ background: rgba(255,255,255,.05); }
+    .opt:hover{ transform: translateY(-1px); }
+    .opt.selected{
+      outline: 4px solid rgba(255,59,122,.18);
+      border-color: rgba(255,59,122,.45);
+    }
+    .opt b{ display:block; }
+    .opt span{ display:block; color: var(--muted); font-weight: 700; font-size: 12px; margin-top: 3px; }
+
+    .actions{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content:center;
+      margin-top: 12px;
+    }
+    .btn{
+      border: 1px solid rgba(255,255,255,.16);
+      background: linear-gradient(135deg, var(--yes), #ff76a8);
+      color:#fff;
+      font-weight: 900;
+      border-radius: 999px;
+      padding: 12px 16px;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      box-shadow: 0 10px 24px rgba(0,0,0,.14);
+    }
+    .btn:hover{ filter: brightness(1.02); transform: translateY(-1px); }
+    .btn:active{ transform: translateY(0px); }
+    .btn.ghost{
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--stroke);
+      box-shadow: none;
+    }
+
+    .footerRow{
+      margin-top: 12px;
+      display:flex; flex-wrap: wrap; gap: 10px;
+      justify-content:center;
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 12px;
+      position: relative; z-index: 2;
+    }
+
+    /* Mini games */
+    .minigames{
+      margin-top: 12px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      text-align:left;
+    }
+    @media (max-width: 720px){ .minigames{ grid-template-columns: 1fr; } }
+    .panel{
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.30);
+      border-radius: 18px;
+      padding: 12px;
+    }
+    :root.night .panel{ background: rgba(255,255,255,.05); }
+    .panel h4{ margin: 0 0 8px; font-family: Fraunces, serif; }
+    .panel p{ margin: 0; color: var(--muted); font-weight: 700; }
+
+    .wheelRow{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      justify-content:space-between;
+      margin-top: 10px;
+    }
+    .wheel{
+      width: 74px; height: 74px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: conic-gradient(from 0deg, rgba(255,59,122,.9), rgba(255,122,176,.9), rgba(255,220,235,.9), rgba(255,59,122,.9));
+      box-shadow: 0 10px 24px rgba(0,0,0,.12);
+      display:grid;
+      place-items:center;
+      font-weight: 900;
+      color: white;
+      user-select:none;
+    }
+    .wheel.spin{ animation: spin 1.2s cubic-bezier(.15,.9,.2,1) forwards; }
+    @keyframes spin{ from{ transform: rotate(0deg); } to{ transform: rotate(1260deg); } }
+
+    .grid4{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .tile{
+      aspect-ratio: 1/1;
+      border-radius: 14px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.22);
+      display:grid;
+      place-items:center;
+      font-size: 20px;
+      cursor:pointer;
+      user-select:none;
+      font-weight: 900;
+      color: var(--text);
+    }
+    :root.night .tile{ background: rgba(255,255,255,.05); }
+    .tile.revealed{ background: rgba(255,59,122,.14); border-color: rgba(255,59,122,.35); }
+    .tile.matched{ opacity: .55; pointer-events:none; }
+
+    @keyframes pop{ from{ transform: scale(.97); opacity: 0; } to{ transform: scale(1); opacity: 1; } }
   </style>
 </head>
 
 <body>
   <canvas id="confettiCanvas"></canvas>
+  <canvas id="sparkleCanvas"></canvas>
+  <div class="hearts" id="heartsLayer" aria-hidden="true"></div>
 
-  <main class="card">
-    <!-- ANIMAL WITH HEART -->
-    <svg class="art" viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg">
+  <main class="card" id="card">
+    <div class="topbar">
+      <div class="badge" id="badge">
+        <span aria-hidden="true">💘</span>
+        <span id="badgeText">Protocol Valentine: ACTIV</span>
+      </div>
+
+      <div class="controls">
+        <button class="iconBtn" id="themeBtn" type="button" title="Schimbă tema" aria-label="Schimbă tema">🌙</button>
+        <button class="iconBtn" id="soundBtn" type="button" title="Sunet" aria-label="Sunet">🔇</button>
+        <button class="iconBtn" id="resetBtn" type="button" title="Resetare" aria-label="Resetare">↺</button>
+      </div>
+    </div>
+
+    <!-- Cute animal -->
+    <svg class="art" viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animăluț drăguț cu inimioară">
       <defs>
         <linearGradient id="fur" x1="0" x2="1">
           <stop offset="0" stop-color="#f7c7a1"/>
@@ -171,34 +542,225 @@
             fill="#ff7aa2"/>
     </svg>
 
-    <h1>nirali will you be my valentine?</h1>
+    <h1 id="title">nirali, vrei să fii Valentine-ul meu?</h1>
+    <p class="sub" id="subtitle">Două butoane. Un destin. (mucho grande • pisicuto • bursuc)</p>
 
-    <section class="button-zone" id="zone">
-      <button id="yesBtn">Yes</button>
-      <button id="noBtn">No</button>
+    <div class="stats" aria-live="polite">
+      <div class="stat">
+        <b><span id="noAttempts">0</span> încercări de „Nu”</b>
+        <span>(drăguț, dar nu 😌)</span>
+      </div>
+      <div class="stat">
+        <b>Dimensiunea lui „Da”: <span id="yesLevel">1</span>x</b>
+        <span>(crește inevitabil)</span>
+      </div>
+      <div class="stat">
+        <b>Inevitabilitate: <span id="inev">0</span>%</b>
+        <span>(știință exactă)</span>
+      </div>
+    </div>
+
+    <section class="button-zone" id="zone" aria-label="Butoane Valentine">
+      <button id="yesBtn">DA</button>
+      <button id="noBtn">NU</button>
     </section>
 
-    <!-- HINT -->
-    <div class="hint" id="hint">“No” seems a bit shy 😈</div>
+    <div class="hint" id="hint">„Nu” e cam timid 😈 (încearcă să-l atingi)</div>
 
-    <section class="result" id="result">
-      <h2>YAY! 🎉</h2>
-      <img
-        class="fireworks"
-        src="https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif"
-        alt="Fireworks"
-      />
+    <div class="dialog" id="dialog" role="status" aria-live="polite">
+      <b id="dialogTitle">Comentariu live</b>
+      <p id="dialogText">Apropie-te de „Nu” și vezi ce se întâmplă. Sau… apasă „Da” 😇</p>
+    </div>
+
+    <section class="result" id="result" aria-live="polite">
+      <h2 id="yayTitle">YAAAY! 🎉</h2>
+      <p class="mini" id="yayMini">Tocmai l-ai făcut pe <span id="fromNameMini">mine</span> super fericit.</p>
+
+      <div class="envelopeWrap">
+        <div class="envelope" id="envelope">
+          <div class="flap"></div>
+          <div class="note">
+            <h3 id="noteTitle">O notiță mică 💌</h3>
+            <p id="noteBody">
+              Am o propunere: alegi una de mai jos și eu vin cu vibe-ul bun, gustările și playlist-ul.
+              (și cu energia: <b>mucho grande</b>, <b>pisicuto</b>, <b>bursuc</b> 😌)
+            </p>
+            <p class="sig" id="sig">— <span id="fromName">Sebastian</span></p>
+
+            <div class="strip">
+              <div class="stripHead">
+                <b>Momentele noastre ✨</b>
+                <span id="stripCaption">„our highlights” (în varianta noastră)</span>
+              </div>
+              <div class="photos">
+                <img src="./images/1.jpg" alt="Amintire 1">
+                <img src="./images/2.jpg" alt="Amintire 2">
+                <img src="./images/3.jpg" alt="Amintire 3">
+                <img src="./images/4.jpg" alt="Amintire 4">
+                <img src="./images/5.jpg" alt="Amintire 5">
+                <img src="./images/6.jpg" alt="Amintire 6">
+              </div>
+            </div>
+
+            <div class="options" id="options">
+              <div class="opt" data-opt="Cafea + plimbare" data-when="2026-02-14T16:00">
+                <b>☕ Cafea + plimbare</b>
+                <span>14 feb • 16:00</span>
+              </div>
+              <div class="opt" data-opt="Cină" data-when="2026-02-14T19:30">
+                <b>🍝 Cină</b>
+                <span>14 feb • 19:30</span>
+              </div>
+              <div class="opt" data-opt="Film + desert" data-when="2026-02-14T18:30">
+                <b>🍿 Film + desert</b>
+                <span>14 feb • 18:30</span>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="btn" id="icsBtn" type="button">Adaugă în Calendar</button>
+              <button class="btn ghost" id="copyBtn" type="button">Copiază link-ul</button>
+              <button class="btn ghost" id="openBtn" type="button">Deschide plicul</button>
+            </div>
+
+            <div class="footerRow">
+              <span id="countdown">Numărătoare inversă: …</span>
+              <span id="heartGame">Jocul inimioarelor: 0/5</span>
+              <span id="secretStatus">Secret: blocat 🔒</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="minigames">
+        <div class="panel">
+          <h4>Roata surprizei 🎡</h4>
+          <p>Învârte pentru un bonus drăguț (nu schimbă alegerea… decât dacă vrei).</p>
+          <div class="wheelRow">
+            <div class="wheel" id="wheel" aria-label="Roata surprizei">SPIN</div>
+            <button class="btn ghost" id="spinBtn" type="button">Învârte</button>
+          </div>
+          <p style="margin-top:10px"><b id="spinResult">Rezultat:</b> <span id="spinText" style="color:var(--muted); font-weight:800">—</span></p>
+        </div>
+
+        <div class="panel">
+          <h4>Mini „memory” 🧠</h4>
+          <p>Găsește perechile ca să deblochezi o replică extra.</p>
+          <div class="grid4" id="memoryGrid" aria-label="Grilă joc memory"></div>
+          <p style="margin-top:10px"><b id="memoryStatus">Status:</b> <span id="memoryText" style="color:var(--muted); font-weight:800">Găsește toate perechile.</span></p>
+        </div>
+      </div>
     </section>
   </main>
 
   <script>
+    /********************
+     * Personalizare din URL:
+     * ?to=nirali&from=sebastian&opt=Cină&when=2026-02-14T19:30
+     ********************/
+    const params = new URLSearchParams(location.search);
+    const toName = (params.get("to") || "nirali").trim();
+    const fromName = (params.get("from") || "Sebastian").trim();
+    const preOpt = params.get("opt");
+    const preWhen = params.get("when");
+
+    const INSIDE_JOKES = "mucho grande • pisicuto • bursuc";
+
+    const title = document.getElementById("title");
+    const subtitle = document.getElementById("subtitle");
+    const fromNameMini = document.getElementById("fromNameMini");
+    const sig = document.getElementById("sig");
+    const stripCaption = document.getElementById("stripCaption");
+
+    title.textContent = `${toName}, vrei să fii Valentine-ul meu?`;
+    subtitle.textContent = `Două butoane. Un destin. (${INSIDE_JOKES})`;
+    fromNameMini.textContent = fromName;
+    sig.innerHTML = `— <span id="fromName">${fromName}</span>`;
+    stripCaption.textContent = `„momentele noastre” + ${INSIDE_JOKES}`;
+
+    const card = document.getElementById("card");
     const zone = document.getElementById("zone");
     const yesBtn = document.getElementById("yesBtn");
     const noBtn = document.getElementById("noBtn");
     const result = document.getElementById("result");
     const hint = document.getElementById("hint");
+    const dialogText = document.getElementById("dialogText");
 
-    /* ---------- CONFETTI ---------- */
+    const noAttemptsEl = document.getElementById("noAttempts");
+    const yesLevelEl = document.getElementById("yesLevel");
+    const inevEl = document.getElementById("inev");
+
+    const envelope = document.getElementById("envelope");
+    const openBtn = document.getElementById("openBtn");
+    const options = document.getElementById("options");
+    const icsBtn = document.getElementById("icsBtn");
+    const copyBtn = document.getElementById("copyBtn");
+
+    const countdownEl = document.getElementById("countdown");
+    const heartGameEl = document.getElementById("heartGame");
+    const secretStatusEl = document.getElementById("secretStatus");
+
+    const themeBtn = document.getElementById("themeBtn");
+    const soundBtn = document.getElementById("soundBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+    const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    /********************
+     * Sunet (opțional, implicit OFF)
+     ********************/
+    let soundOn = false;
+    soundBtn.textContent = "🔇";
+    const audioCtx = (window.AudioContext || window.webkitAudioContext) ? new (window.AudioContext || window.webkitAudioContext)() : null;
+
+    function beep(freq=440, dur=0.06, type="sine", gain=0.04){
+      if(!soundOn || !audioCtx) return;
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = type; o.frequency.value = freq; g.gain.value = gain;
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(); o.stop(audioCtx.currentTime + dur);
+    }
+    function chord(){
+      beep(523, .07, "sine", .03);
+      setTimeout(()=>beep(659, .07, "sine", .03), 40);
+      setTimeout(()=>beep(784, .08, "sine", .03), 90);
+    }
+
+    soundBtn.addEventListener("click", async () => {
+      soundOn = !soundOn;
+      soundBtn.textContent = soundOn ? "🔊" : "🔇";
+      if(soundOn && audioCtx && audioCtx.state === "suspended"){
+        try{ await audioCtx.resume(); }catch{}
+      }
+      beep(soundOn ? 660 : 220, .06, "square", .03);
+    });
+
+    /********************
+     * Tema
+     ********************/
+    const storedTheme = localStorage.getItem("val_theme");
+    if(storedTheme === "night") document.documentElement.classList.add("night");
+    themeBtn.textContent = document.documentElement.classList.contains("night") ? "☀️" : "🌙";
+
+    themeBtn.addEventListener("click", () => {
+      document.documentElement.classList.toggle("night");
+      const night = document.documentElement.classList.contains("night");
+      localStorage.setItem("val_theme", night ? "night" : "day");
+      themeBtn.textContent = night ? "☀️" : "🌙";
+      beep(night ? 330 : 660, .06, "triangle", .03);
+    });
+
+    /********************
+     * Resetare
+     ********************/
+    resetBtn.addEventListener("click", () => {
+      location.href = location.pathname + (location.search ? location.search.replace(/([?&])accepted=1(&|$)/, "$1").replace(/&$/, "") : "");
+    });
+
+    /********************
+     * Confetti
+     ********************/
     const confettiCanvas = document.getElementById("confettiCanvas");
 
     function resizeConfettiCanvas() {
@@ -208,52 +770,96 @@
       confettiCanvas.style.width = "100vw";
       confettiCanvas.style.height = "100vh";
     }
-
     resizeConfettiCanvas();
     window.addEventListener("resize", resizeConfettiCanvas);
     window.addEventListener("orientationchange", () => setTimeout(resizeConfettiCanvas, 150));
 
-    const confettiInstance = confetti.create(confettiCanvas, {
-      resize: false,
-      useWorker: true
-    });
+    const confettiInstance = confetti.create(confettiCanvas, { resize: false, useWorker: true });
 
     function fullScreenConfetti() {
+      if(prefersReducedMotion) return;
       const end = Date.now() + 1600;
-
       (function frame() {
         confettiInstance({
-          particleCount: 12,
-          spread: 90,
-          startVelocity: 45,
-          ticks: 180,
+          particleCount: 12, spread: 90, startVelocity: 45, ticks: 180,
           origin: { x: Math.random(), y: Math.random() * 0.3 }
         });
         if (Date.now() < end) requestAnimationFrame(frame);
       })();
-
       setTimeout(() => {
         confettiInstance({
-          particleCount: 300,
-          spread: 140,
-          startVelocity: 60,
-          ticks: 220,
+          particleCount: 260, spread: 140, startVelocity: 60, ticks: 220,
           origin: { x: 0.5, y: 0.55 }
         });
-      }, 300);
+      }, 260);
+    }
+    function heartBurst(x=0.5, y=0.45){
+      if(prefersReducedMotion) return;
+      confettiInstance({ particleCount: 80, spread: 60, startVelocity: 35, ticks: 160, origin: { x, y } });
     }
 
-    /* ---------- YES BUTTON GROWS ---------- */
+    /********************
+     * Proximitate glow
+     ********************/
+    function setGlowFromEvent(e){
+      const rect = card.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      card.style.setProperty("--px", x + "%");
+      card.style.setProperty("--py", y + "%");
+    }
+    window.addEventListener("pointermove", setGlowFromEvent, {passive:true});
+
+    /********************
+     * DA crește + etichete
+     ********************/
     let yesScale = 1;
-    function growYes() {
-      yesScale = Math.min(2.2, yesScale + 0.1);
-      yesBtn.style.transform = `translateY(-50%) scale(${yesScale})`;
+    let yesTier = 0;
+    const yesLabels = [
+      "DA",
+      "DA 😇",
+      "DA!! 💖",
+      "DA, CLAR 😤",
+      "DA DA DA 💘",
+      `DA, ${toName} 😈`
+    ];
+
+    function updateInevitability(){
+      const attempts = parseInt(noAttemptsEl.textContent, 10) || 0;
+      const p = Math.min(99, Math.floor(100 * (1 - Math.exp(-attempts / 4))));
+      inevEl.textContent = p.toString();
     }
 
-    /* ---------- NO BUTTON RUNS AWAY ---------- */
-    function clamp(n, min, max) {
-      return Math.max(min, Math.min(max, n));
+    function growYes() {
+      yesScale = Math.min(2.6, yesScale + 0.12);
+      yesBtn.style.transform = `translateY(-50%) scale(${yesScale})`;
+      yesLevelEl.textContent = yesScale.toFixed(1);
+      yesTier = Math.min(yesLabels.length - 1, Math.floor((yesScale - 1) / 0.35));
+      yesBtn.textContent = yesLabels[yesTier];
+      beep(660 + yesTier*30, .05, "sine", .02);
     }
+
+    /********************
+     * NU fuge + ladder mesaje (cu inside jokes)
+     ********************/
+    let noAttempts = 0;
+    let noMode = 0; // 0 run, 1 swap, 2 maybe, 3 vanish
+
+    const noMessages = [
+      `„Nu”? Alegere curajoasă. 😌`,
+      `Ești sigură? 👀`,
+      `E chiar „Nu”? (bursuc detectat)`,
+      `Ok… „Nu” începe să transpire.`,
+      `Hai că deja e mult 😂 (mucho grande)`,
+      `Îți aduc gustări. Serios.`,
+      `„Nu” joacă „pisicuto” și fuge.`,
+      `Universul votează „DA”.`,
+      `Ultima șansă să fii dramatică 😈`,
+      `Gata. Destinul a preluat controlul. ✅`
+    ];
+
+    function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+    function setDialog(msg){ dialogText.textContent = msg; }
 
     function moveNo(px, py) {
       const z = zone.getBoundingClientRect();
@@ -262,11 +868,11 @@
       let dx = (b.left + b.width / 2) - px;
       let dy = (b.top + b.height / 2) - py;
       let mag = Math.hypot(dx, dy) || 1;
-      dx /= mag;
-      dy /= mag;
+      dx /= mag; dy /= mag;
 
-      let newLeft = (b.left - z.left) + dx * 150;
-      let newTop  = (b.top - z.top) + dy * 150;
+      const push = 120 + Math.min(160, noAttempts * 10);
+      let newLeft = (b.left - z.left) + dx * push;
+      let newTop  = (b.top - z.top) + dy * push;
 
       newLeft = clamp(newLeft, 0, z.width - b.width);
       newTop  = clamp(newTop, 0, z.height - b.height);
@@ -274,32 +880,463 @@
       noBtn.style.left = newLeft + "px";
       noBtn.style.top = newTop + "px";
       noBtn.style.transform = "none";
+    }
+
+    function swapButtons(){
+      const yesLeft = yesBtn.style.left || "16%";
+      const noLeft = noBtn.style.left || "62%";
+      yesBtn.style.left = noLeft;
+      noBtn.style.left = yesLeft;
+      setDialog("S-au schimbat între ele. Asta e pe tine. 😇");
+      beep(520, .06, "square", .03);
+    }
+
+    function evolveNoMode(){
+      if(noAttempts === 3) noMode = 1;
+      if(noAttempts === 6) noMode = 2;
+      if(noAttempts === 9) noMode = 3;
+    }
+
+    function handleNoInteraction(e){
+      noAttempts++;
+      noAttemptsEl.textContent = noAttempts.toString();
+      updateInevitability();
+
+      const msg = noMessages[Math.min(noMessages.length-1, noAttempts-1)];
+      setDialog(msg);
+
+      evolveNoMode();
+
+      if(noMode === 0){
+        moveNo(e.clientX, e.clientY);
+      } else if(noMode === 1){
+        swapButtons();
+        moveNo(e.clientX, e.clientY);
+      } else if(noMode === 2){
+        noBtn.textContent = "POATE? 🙃";
+        moveNo(e.clientX, e.clientY);
+      } else if(noMode === 3){
+        noBtn.style.display = "none";
+        setDialog("„Nu” a ieșit din chat. ✅");
+        hint.textContent = "Ok. Deci… „Da”? 😇";
+        heartBurst(0.5, 0.35);
+        beep(220, .08, "triangle", .03);
+      }
 
       growYes();
     }
 
-    zone.addEventListener("pointermove", e => {
+    zone.addEventListener("pointermove", (e) => {
+      if(noBtn.style.display === "none") return;
       const b = noBtn.getBoundingClientRect();
-      const d = Math.hypot(
-        (b.left + b.width / 2) - e.clientX,
-        (b.top + b.height / 2) - e.clientY
-      );
-      if (d < 140) moveNo(e.clientX, e.clientY);
+      const d = Math.hypot((b.left + b.width/2) - e.clientX, (b.top + b.height/2) - e.clientY);
+      if(d < 160) handleNoInteraction(e);
     });
 
-    noBtn.addEventListener("click", e => e.preventDefault());
+    noBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      handleNoInteraction({clientX: e.clientX, clientY: e.clientY});
+    });
 
-    /* ---------- YES CLICK ---------- */
-    yesBtn.addEventListener("click", () => {
+    /********************
+     * DA click -> reveal
+     ********************/
+    function accept(){
       zone.style.display = "none";
-      hint.style.display = "none";     // HIDE THE HINT
+      hint.style.display = "none";
       result.style.display = "block";
       resizeConfettiCanvas();
       fullScreenConfetti();
+      chord();
+
+      setTimeout(() => { envelope.classList.add("open"); }, prefersReducedMotion ? 0 : 450);
+
+      const u = new URL(location.href);
+      u.searchParams.set("accepted", "1");
+      history.replaceState({}, "", u.toString());
+    }
+
+    yesBtn.addEventListener("click", accept);
+    yesBtn.addEventListener("keydown", (e) => {
+      if(e.key === "Enter" || e.key === " "){ e.preventDefault(); accept(); }
     });
+
+    openBtn.addEventListener("click", () => {
+      envelope.classList.toggle("open");
+      beep(520, .06, "triangle", .03);
+    });
+
+    /********************
+     * Opțiuni + share link
+     ********************/
+    let selectedOpt = null;
+    let selectedWhen = null;
+
+    function selectOpt(el){
+      [...options.querySelectorAll(".opt")].forEach(o => o.classList.remove("selected"));
+      el.classList.add("selected");
+      selectedOpt = el.getAttribute("data-opt");
+      selectedWhen = el.getAttribute("data-when");
+      setDialog(`Bifat: ${selectedOpt}. Eu deja zâmbesc.`);
+      heartBurst(0.55, 0.55);
+      beep(740, .05, "sine", .02);
+      updateCountdown();
+    }
+
+    options.addEventListener("click", (e) => {
+      const opt = e.target.closest(".opt");
+      if(!opt) return;
+      selectOpt(opt);
+    });
+
+    function preselect(){
+      const opts = [...options.querySelectorAll(".opt")];
+      let found = null;
+      if(preOpt) found = opts.find(o => o.getAttribute("data-opt") === preOpt);
+      if(!found && preWhen) found = opts.find(o => o.getAttribute("data-when") === preWhen);
+      if(!found) found = opts[0];
+      selectOpt(found);
+    }
+
+    /********************
+     * ICS
+     ********************/
+    function toICSDate(dt){
+      const d = new Date(dt);
+      const yyyy = d.getUTCFullYear();
+      const mm = String(d.getUTCMonth()+1).padStart(2,"0");
+      const dd = String(d.getUTCDate()).padStart(2,"0");
+      const hh = String(d.getUTCHours()).padStart(2,"0");
+      const mi = String(d.getUTCMinutes()).padStart(2,"0");
+      return `${yyyy}${mm}${dd}T${hh}${mi}00Z`;
+    }
+
+    function downloadICS(){
+      if(!selectedOpt || !selectedWhen){
+        setDialog("Alege o opțiune mai întâi 😇");
+        beep(220, .06, "square", .03);
+        return;
+      }
+
+      const start = toICSDate(selectedWhen);
+      const endDate = new Date(selectedWhen);
+      endDate.setMinutes(endDate.getMinutes() + 90);
+      const end = toICSDate(endDate.toISOString().slice(0,16));
+
+      const uid = `val-${Date.now()}@githubpages`;
+      const summary = `Întâlnire Valentine: ${selectedOpt}`;
+      const description = `Ai spus DA 💘\\nPentru: ${toName}\\nDe la: ${fromName}\\nOpțiune: ${selectedOpt}\\nInside jokes: ${INSIDE_JOKES}`;
+
+      const ics =
+`BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Valentine Page//RO
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:${uid}
+DTSTAMP:${toICSDate(new Date().toISOString().slice(0,16))}
+DTSTART:${start}
+DTEND:${end}
+SUMMARY:${summary}
+DESCRIPTION:${description}
+END:VEVENT
+END:VCALENDAR`;
+
+      const blob = new Blob([ics], {type:"text/calendar;charset=utf-8"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `valentine-${selectedOpt.replace(/\s+/g,"-").toLowerCase()}.ics`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      setDialog("Invitația a plecat. Oficial, oficial. ✅");
+      chord();
+    }
+    icsBtn.addEventListener("click", downloadICS);
+
+    async function copyShare(){
+      const u = new URL(location.href);
+      u.searchParams.set("to", toName);
+      u.searchParams.set("from", fromName);
+      if(selectedOpt) u.searchParams.set("opt", selectedOpt);
+      if(selectedWhen) u.searchParams.set("when", selectedWhen);
+      u.searchParams.set("accepted", "1");
+
+      const link = u.toString();
+      try{
+        await navigator.clipboard.writeText(link);
+        setDialog("Link copiat. Trimite-l 😈");
+        beep(880, .05, "sine", .02);
+      }catch{
+        prompt("Copiază link-ul:", link);
+      }
+    }
+    copyBtn.addEventListener("click", copyShare);
+
+    /********************
+     * Countdown
+     ********************/
+    function getDefaultTarget(){
+      const y = new Date().getFullYear();
+      const baseYear = (y > 2026 ? y : 2026);
+      return new Date(`${baseYear}-02-14T19:00`);
+    }
+    function fmtDelta(ms){
+      const s = Math.max(0, Math.floor(ms/1000));
+      const d = Math.floor(s / 86400);
+      const h = Math.floor((s % 86400) / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      return `${d}z ${h}h ${m}m`;
+    }
+    function updateCountdown(){
+      const target = selectedWhen ? new Date(selectedWhen) : getDefaultTarget();
+      const now = new Date();
+      const ms = target - now;
+      countdownEl.textContent = ms > 0 ? `Numărătoare inversă: ${fmtDelta(ms)}` : `Numărătoare inversă: e momentul 💘`;
+    }
+    setInterval(updateCountdown, 1000 * 15);
+    updateCountdown();
+
+    /********************
+     * Hearts mini-game (tap 5)
+     ********************/
+    const heartsLayer = document.getElementById("heartsLayer");
+    let heartTaps = 0;
+    let secretUnlocked = false;
+
+    function spawnHeart(){
+      if(prefersReducedMotion) return;
+      const h = document.createElement("div");
+      h.className = "heart";
+      const left = Math.random() * 100;
+      const size = 10 + Math.random()*16;
+      const dur = 6 + Math.random()*6;
+      h.style.left = left + "vw";
+      h.style.width = size + "px";
+      h.style.height = size + "px";
+      h.style.animationDuration = dur + "s";
+      h.style.opacity = (0.6 + Math.random()*0.4).toFixed(2);
+
+      h.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        heartTaps++;
+        heartGameEl.textContent = `Jocul inimioarelor: ${Math.min(heartTaps,5)}/5`;
+        heartBurst(e.clientX / window.innerWidth, e.clientY / window.innerHeight);
+        beep(760, .04, "sine", .02);
+        h.remove();
+
+        if(heartTaps >= 5 && !secretUnlocked){
+          secretUnlocked = true;
+          secretStatusEl.textContent = "Secret: deblocat 🔓";
+          setDialog(`Secret deblocat: ești periculos de drăguță. (${INSIDE_JOKES})`);
+          chord();
+        }
+      }, {passive:false});
+
+      heartsLayer.appendChild(h);
+      setTimeout(() => h.remove(), dur*1000);
+    }
+
+    if(!prefersReducedMotion){
+      setInterval(spawnHeart, 700);
+      for(let i=0;i<10;i++) setTimeout(spawnHeart, i*120);
+    }
+
+    /********************
+     * Easter egg: type "nirali" or "valentine" or "bursuc"
+     ********************/
+    let keybuf = "";
+    window.addEventListener("keydown", (e) => {
+      if(e.key.length !== 1) return;
+      keybuf = (keybuf + e.key.toLowerCase()).slice(-20);
+      if(keybuf.includes("nirali") || keybuf.includes("valentine") || keybuf.includes("bursuc")){
+        secretUnlocked = true;
+        secretStatusEl.textContent = "Secret: deblocat 🔓";
+        setDialog(`Easter egg! Ai găsit ruta secretă 💘 (${INSIDE_JOKES})`);
+        heartBurst(0.5, 0.35);
+        chord();
+        keybuf = "";
+      }
+    });
+
+    /********************
+     * Spin wheel
+     ********************/
+    const wheel = document.getElementById("wheel");
+    const spinBtn = document.getElementById("spinBtn");
+    const spinText = document.getElementById("spinText");
+
+    const spinOutcomes = [
+      "Bonus: cupon de pupic pe frunte 💋",
+      "Bonus: tu alegi playlist-ul 🎶",
+      "Bonus: desert obligatoriu 🍰",
+      "Bonus: minim 3 îmbrățișări 🤗",
+      "Bonus: ținute asortate (poate) 😌",
+      "Bonus: eu aduc flori 🌸"
+    ];
+
+    function spin(){
+      if(wheel.classList.contains("spin")) return;
+      wheel.classList.add("spin");
+      beep(520, .06, "square", .03);
+
+      const idx = Math.floor(Math.random() * spinOutcomes.length);
+      setTimeout(() => {
+        spinText.textContent = spinOutcomes[idx];
+        wheel.classList.remove("spin");
+        heartBurst(0.62, 0.62);
+        beep(880, .06, "triangle", .03);
+      }, prefersReducedMotion ? 0 : 1200);
+    }
+    spinBtn.addEventListener("click", spin);
+    wheel.addEventListener("click", spin);
+
+    /********************
+     * Memory match
+     ********************/
+    const memoryGrid = document.getElementById("memoryGrid");
+    const memoryText = document.getElementById("memoryText");
+
+    const icons = ["💘","💘","🍓","🍓","🌙","🌙","🎀","🎀"];
+    function shuffle(a){
+      for(let i=a.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i],a[j]]=[a[j],a[i]];
+      }
+      return a;
+    }
+    let deck = shuffle([...icons]);
+    let first = null;
+    let lock = false;
+    let matched = 0;
+
+    function renderMemory(){
+      memoryGrid.innerHTML = "";
+      deck.forEach((ic, idx) => {
+        const t = document.createElement("div");
+        t.className = "tile";
+        t.setAttribute("role", "button");
+        t.setAttribute("tabindex", "0");
+        t.setAttribute("aria-label", "Piesă memory");
+        t.textContent = "•";
+        t.addEventListener("click", () => flip(idx, t));
+        t.addEventListener("keydown", (e) => {
+          if(e.key === "Enter" || e.key === " "){
+            e.preventDefault(); flip(idx, t);
+          }
+        });
+        memoryGrid.appendChild(t);
+      });
+    }
+
+    function flip(idx, tileEl){
+      if(lock) return;
+      if(tileEl.classList.contains("matched") || tileEl.classList.contains("revealed")) return;
+
+      tileEl.classList.add("revealed");
+      tileEl.textContent = deck[idx];
+      beep(660, .04, "sine", .02);
+
+      if(!first){ first = { idx, el: tileEl }; return; }
+      if(first.idx === idx) return;
+
+      if(deck[first.idx] === deck[idx]){
+        tileEl.classList.add("matched");
+        first.el.classList.add("matched");
+        matched += 2;
+        first = null;
+        heartBurst(0.45, 0.65);
+        beep(880, .06, "triangle", .03);
+
+        if(matched === deck.length){
+          memoryText.textContent = `Deblocat: noi doi = match perfect 💞 (${INSIDE_JOKES})`;
+          setDialog("Ai terminat memory. Da, suntem cheesy. 😌");
+          chord();
+        }else{
+          memoryText.textContent = `Perechi: ${matched/2}/4.`;
+        }
+      }else{
+        lock = true;
+        setTimeout(() => {
+          tileEl.classList.remove("revealed");
+          first.el.classList.remove("revealed");
+          tileEl.textContent = "•";
+          first.el.textContent = "•";
+          first = null;
+          lock = false;
+          beep(220, .06, "square", .02);
+        }, prefersReducedMotion ? 0 : 650);
+      }
+    }
+
+    renderMemory();
+
+    /********************
+     * Sparkle trail (subtil)
+     ********************/
+    const sparkleCanvas = document.getElementById("sparkleCanvas");
+    const sctx = sparkleCanvas.getContext("2d");
+    let sparkles = [];
+
+    function resizeSparkle(){
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      sparkleCanvas.width = Math.floor(window.innerWidth * dpr);
+      sparkleCanvas.height = Math.floor(window.innerHeight * dpr);
+      sparkleCanvas.style.width = "100vw";
+      sparkleCanvas.style.height = "100vh";
+      sctx.setTransform(dpr,0,0,dpr,0,0);
+    }
+    resizeSparkle();
+    window.addEventListener("resize", resizeSparkle);
+
+    function addSparkle(x,y){
+      if(prefersReducedMotion) return;
+      sparkles.push({x,y,life: 24 + Math.random()*12, r: 1 + Math.random()*2.5});
+      if(sparkles.length > 220) sparkles.splice(0, 60);
+    }
+
+    window.addEventListener("pointermove", (e) => {
+      if(window.matchMedia && window.matchMedia("(pointer: fine)").matches){
+        if(Math.random() < 0.35) addSparkle(e.clientX, e.clientY);
+      }
+    }, {passive:true});
+
+    function tickSparkles(){
+      if(prefersReducedMotion) return;
+      sctx.clearRect(0,0, sparkleCanvas.width, sparkleCanvas.height);
+      for(const sp of sparkles){
+        sp.life -= 1;
+        sp.r *= 0.98;
+        const a = Math.max(0, sp.life/36);
+        sctx.beginPath();
+        sctx.arc(sp.x, sp.y, sp.r, 0, Math.PI*2);
+        sctx.fillStyle = `rgba(255, 160, 200, ${a*0.55})`;
+        sctx.fill();
+      }
+      sparkles = sparkles.filter(s => s.life > 0);
+      requestAnimationFrame(tickSparkles);
+    }
+    tickSparkles();
+
+    /********************
+     * Boot
+     ********************/
+    preselect();
+
+    if(params.get("accepted") === "1"){
+      zone.style.display = "none";
+      hint.style.display = "none";
+      result.style.display = "block";
+      envelope.classList.add("open");
+      setDialog(`Bine ai revenit. Răspunsul rămâne „DA”. 💘 (${INSIDE_JOKES})`);
+      updateCountdown();
+    }else{
+      updateInevitability();
+    }
   </script>
 </body>
 </html>
-
-
-
