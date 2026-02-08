@@ -543,7 +543,7 @@
             fill="#ff7aa2"/>
     </svg>
 
-    <h1 id="title">nirali, vrei să fii Valentine-ul meu?</h1>
+    <h1 id="title">Doroteea, vrei să fii Valentine-ul meu?</h1>
     <p class="sub" id="subtitle">Două butoane. Un destin. (mucho grande • pisicuto • bursuc)</p>
 
     <div class="stats" aria-live="polite">
@@ -553,7 +553,7 @@
       </div>
       <div class="stat">
         <b>Dimensiunea lui „Da”: <span id="yesLevel">1</span>x</b>
-        <span>(crește inevitabil)</span>
+        <span></span>
       </div>
       <div class="stat">
         <b>Inevitabilitate: <span id="inev">0</span>%</b>
@@ -657,10 +657,10 @@
   <script>
     /********************
      * Personalizare din URL:
-     * ?to=nirali&from=sebastian&opt=Cină&when=2026-02-14T19:30
+     * ?to=Doroteea&from=sebastian&opt=Cină&when=2026-02-14T19:30
      ********************/
     const params = new URLSearchParams(location.search);
-    const toName = (params.get("to") || "nirali").trim();
+    const toName = (params.get("to") || "Doroteea").trim();
     const fromName = (params.get("from") || "Sebastian").trim();
     const preOpt = params.get("opt");
     const preWhen = params.get("when");
@@ -1148,13 +1148,13 @@ END:VCALENDAR`;
     }
 
     /********************
-     * Easter egg: type "nirali" or "valentine" or "bursuc"
+     * Easter egg: type "Doroteea" or "valentine" or "bursuc"
      ********************/
     let keybuf = "";
     window.addEventListener("keydown", (e) => {
       if(e.key.length !== 1) return;
       keybuf = (keybuf + e.key.toLowerCase()).slice(-20);
-      if(keybuf.includes("nirali") || keybuf.includes("valentine") || keybuf.includes("bursuc")){
+      if(keybuf.includes("Doroteea") || keybuf.includes("valentine") || keybuf.includes("bursuc")){
         secretUnlocked = true;
         secretStatusEl.textContent = "Secret: deblocat 🔓";
         setDialog(`Easter egg! Ai găsit ruta secretă 💘 (${INSIDE_JOKES})`);
